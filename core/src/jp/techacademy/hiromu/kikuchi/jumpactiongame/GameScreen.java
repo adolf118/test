@@ -1,6 +1,7 @@
 package jp.techacademy.hiromu.kikuchi.jumpactiongame;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -51,6 +52,7 @@ public class GameScreen extends ScreenAdapter {
     BitmapFont mFont;
     int mScore;
     int mHighScore;
+    Preferences mPrefs;
 
     public GameScreen(JumpActionGame game) {
         mGame = game;
@@ -83,7 +85,8 @@ public class GameScreen extends ScreenAdapter {
         mScore = 0;// ←追加する
         mHighScore = 0;// ←追加する
 
-
+        mPrefs = Gdx.app.getPreferences("jp.techacademy.hiromu.kikuchi.jumpactiongame");
+        mHighScore = mPrefs.getInteger("HIGHSCORE", 0);
 
         createStage();
     }
@@ -130,12 +133,12 @@ public class GameScreen extends ScreenAdapter {
         mPlayer.draw(mGame.batch);
 
         //スコアを表示する
-        mGuiCamera.update(); // ←追加する
+        mGuiCamera.update();
         mGame.batch.setProjectionMatrix(mGuiCamera.combined); // ←追加する
-        mGame.batch.begin(); // ←追加する
+        mGame.batch.begin();
         mFont.draw(mGame.batch, "HighScore: " + mHighScore, 16, GUI_HEIGHT - 15); // ←追加する
         mFont.draw(mGame.batch, "Score: " + mScore, 16, GUI_HEIGHT - 35); // ←追加する
-        mGame.batch.end(); // ←追加する
+        mGame.batch.end();
 
     }
 
@@ -247,6 +250,9 @@ public class GameScreen extends ScreenAdapter {
 
 
     private void updateGameOver() {
+        if (Gdx.input.justTouched()) {
+            mGame.setScreen(new ResultScreen(mGame, mScore));
+        }
 
     }
 
@@ -270,6 +276,9 @@ public class GameScreen extends ScreenAdapter {
                 mScore++;
                 if (mScore > mHighScore) {
                     mHighScore = mScore;
+
+                    mPrefs.putInteger("HIGHSCORE", mHighScore);
+                    mPrefs.flush();
                 }
                 break;
             }
